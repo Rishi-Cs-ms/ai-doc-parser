@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+@theme {
+  --color-bg-deep: #050511;
+  --color-bg-surface: #0f1123;
+  --color-primary: #6366f1;
+  --color-secondary: #ec4899;
+
+  --font-outfit: 'Outfit', sans-serif;
+}
+
+/* Custom Utilities Layer */
+@layer utilities {
+  .glass-card {
+    @apply backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl shadow-xl transition-all duration-300;
+  }
+
+  .glass-card:hover {
+    @apply border-white/20 bg-white/10 -translate-y-1 shadow-2xl;
+  }
+
+  .btn-glow {
+    @apply bg-gradient-to-r from-indigo-500 to-pink-500 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 hover:brightness-110 hover:-translate-y-[2px] active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+}
+
+/* Base Styles */
+body {
+  background-color: var(--color-bg-deep);
+  color: white;
+  font-family: var(--font-outfit);
+  overflow-x: hidden;
+  background-image:
+    radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 25%),
+    radial-gradient(circle at 85% 30%, rgba(236, 72, 153, 0.08) 0%, transparent 25%);
+  background-attachment: fixed;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  display: none;
+}
