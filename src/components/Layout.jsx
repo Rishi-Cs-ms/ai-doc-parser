@@ -22,12 +22,12 @@ const Layout = () => {
 
     const navItems = [
         { name: 'Dashboard', path: '/', icon: <LayoutDashboard size={20} /> },
-        { name: 'Upload', path: '/upload', icon: <UploadCloud size={20} /> },
+        { name: 'Uploads', path: '/upload', icon: <UploadCloud size={20} /> },
         { name: 'Resumes', path: '/resume', icon: <FileText size={20} /> },
         { name: 'Invoices', path: '/invoice', icon: <Receipt size={20} /> },
         { name: 'Loans', path: '/loan', icon: <CreditCard size={20} /> },
         { name: 'Passports', path: '/passport', icon: <Globe size={20} /> },
-        { name: 'ID Proofs', path: '/idproof', icon: <BadgeCheck size={20} /> },
+        { name: 'ID-Proofs', path: '/idproof', icon: <BadgeCheck size={20} /> },
     ];
 
     const handleDropdownNavigate = (path) => {
