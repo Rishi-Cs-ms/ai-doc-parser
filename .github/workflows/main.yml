@@ -6,7 +6,7 @@ on:
       - main
 
 permissions:
-  id-token: write   # REQUIRED for OIDC
+  id-token: write   
   contents: read
 
 jobs:
@@ -35,10 +35,10 @@ jobs:
           aws-region: ca-central-1
 
       - name: Upload to S3
-        run: aws s3 sync dist s3://YOUR_S3_BUCKET_NAME --delete
+        run: aws s3 sync dist s3://ai-text-lambda --delete
 
       - name: Invalidate CloudFront cache
         run: |
           aws cloudfront create-invalidation \
-            --distribution-id YOUR_CLOUDFRONT_DISTRIBUTION_ID \
+            --distribution-id E31BS3PWQJIWPH \
             --paths "/*"
