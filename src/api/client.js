@@ -1,19 +1,22 @@
-import axios from 'axios';
+import axios from "axios";
 
+/* ---------- API BASE URL ---------- */
 const API_BASE_URL = import.meta.env.DEV
-    ? '/api'
-    : 'https://nvins6vagf.execute-api.ca-central-1.amazonaws.com/prod';
+    ? "/api" // Vite dev proxy → CloudFront API
+    : "https://api-ai-doc-parser.rishimajmudar.me"; // CloudFront API domain
 
-console.log('Current Environment:', import.meta.env.MODE);
-console.log('API Base URL:', API_BASE_URL);
+console.log("Current Environment:", import.meta.env.MODE);
+console.log("API Base URL:", API_BASE_URL);
 
+/* ---------- AXIOS INSTANCE ---------- */
 const apiClient = axios.create({
     baseURL: API_BASE_URL,
     headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
     },
 });
 
+/* ---------- FETCH HELPER ---------- */
 export const fetchData = async (endpoint, limit = 20) => {
     try {
         const response = await apiClient.get(`${endpoint}?limit=${limit}`);
