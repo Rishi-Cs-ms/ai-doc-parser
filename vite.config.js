@@ -9,7 +9,6 @@ export default defineConfig({
       '/api': {
         target: 'https://nvins6vagf.execute-api.ca-central-1.amazonaws.com/prod',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''),
       },
     },
   },
