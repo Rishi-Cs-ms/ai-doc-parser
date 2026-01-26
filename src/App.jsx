@@ -25,7 +25,7 @@ function App() {
             path="resume"
             element={
               <DataView
-                endpoint="/api/resume"
+                endpoint="/resume"
                 title="Resumes"
                 subtitle="Parsed resume data from applicants"
                 columns={columnConfigs.resume}
@@ -37,7 +37,7 @@ function App() {
             path="loan"
             element={
               <DataView
-                endpoint="/api/loan"
+                endpoint="/loan"
                 title="Loans"
                 subtitle="Loan application documents"
                 columns={columnConfigs.loan}
@@ -48,7 +48,7 @@ function App() {
             path="invoice"
             element={
               <DataView
-                endpoint="/api/invoice"
+                endpoint="/invoice"
                 title="Invoices"
                 subtitle="Processed invoice data"
                 columns={columnConfigs.invoice}
@@ -59,7 +59,7 @@ function App() {
             path="passport"
             element={
               <DataView
-                endpoint="/api/passport"
+                endpoint="/passport"
                 title="Passports"
                 subtitle="Passport identity extractions"
                 columns={columnConfigs.passport}
@@ -70,7 +70,7 @@ function App() {
             path="idproof"
             element={
               <DataView
-                endpoint="/api/idproof"
+                endpoint="/idproof"
                 title="ID Proofs"
                 subtitle="Identity verification documents"
                 columns={columnConfigs.idproof}
