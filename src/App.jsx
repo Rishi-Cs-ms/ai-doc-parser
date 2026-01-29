@@ -4,30 +4,28 @@ import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import DataView from './pages/DataView';
 import Upload from './pages/Upload';
-import { exchangeCodeForTokens } from './api/auth';
+import { storeTokens } from './api/auth';
 
 function App() {
   const location = useLocation();
   const navigate = useNavigate();
 
   useEffect(() => {
-    const queryParams = new URLSearchParams(location.search);
-    const code = queryParams.get('code');
+    // Check for tokens in the URL hash (Implicit Flow)
+    if (window.location.hash) {
+      const params = new URLSearchParams(window.location.hash.substring(1));
+      const idToken = params.get('id_token');
+      const accessToken = params.get('access_token');
 
-    if (code) {
-      const handleAuth = async () => {
-        try {
-          await exchangeCodeForTokens(code);
-          // Remove the code parameter from the URL
-          navigate(location.pathname, { replace: true });
-        } catch (error) {
-          console.error('Failed to exchange code:', error);
-          // Optionally show error to user
-        }
-      };
-      handleAuth();
+      if (idToken && accessToken) {
+        storeTokens(idToken, accessToken);
+        // Clear the hash from the URL so the user doesn't see the ugly tokens
+        window.history.replaceState({}, document.title, window.location.pathname);
+        // Force re-render or navigation if needed, though state change might be enough
+        // navigate(location.pathname, { replace: true }); 
+      }
     }
-  }, [location, navigate]);
+  }, [location]);
 
   const columnConfigs = {
     resume: ['name', 'email', 'phone', 'location', 'skills', 'education', 'experience', 'projects'],
