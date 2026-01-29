@@ -20,7 +20,8 @@ export const exchangeCodeForTokens = async (code) => {
 
         if (!response.ok) {
             const error = await response.json();
-            throw new Error(error.error || "Failed to exchange code for tokens");
+            console.error("Token exchange failed:", error);
+            throw new Error(error.error_description || error.error || "Failed to exchange code for tokens");
         }
 
         const tokens = await response.json();
@@ -28,6 +29,7 @@ export const exchangeCodeForTokens = async (code) => {
         return tokens;
     } catch (error) {
         console.error("Token exchange error:", error);
+        alert("Login failed: " + error.message);
         throw error;
     }
 };
@@ -69,5 +71,5 @@ export const isLoggedIn = () => {
 };
 
 export const getLoginUrl = () => {
-    return `https://${COGNITO_DOMAIN}/login?client_id=${CLIENT_ID}&response_type=code&scope=email+openid+profile&redirect_uri=${REDIRECT_URI}`;
+    return `https://${COGNITO_DOMAIN}/login?client_id=${CLIENT_ID}&response_type=code&scope=email+openid+profile&redirect_uri=${encodeURIComponent(REDIRECT_URI)}`;
 };
