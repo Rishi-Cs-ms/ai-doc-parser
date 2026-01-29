@@ -1,5 +1,5 @@
 const COGNITO_DOMAIN = "ca-central-10vcciz7st.auth.ca-central-1.amazoncognito.com";
-const CLIENT_ID = "52v409gv203dm0vvofn4h179q1";
+const CLIENT_ID = "4g8jp8jrqffad7k0kionio9hdb";
 const REDIRECT_URI = "https://ai-doc-parser.rishimajmudar.me";
 
 export const exchangeCodeForTokens = async (code) => {
@@ -71,5 +71,9 @@ export const isLoggedIn = () => {
 };
 
 export const getLoginUrl = () => {
-    return `https://${COGNITO_DOMAIN}/login?client_id=${CLIENT_ID}&response_type=code&scope=email+openid+profile&redirect_uri=${encodeURIComponent(REDIRECT_URI)}`;
+    return `https://${COGNITO_DOMAIN}/login?client_id=${CLIENT_ID}&response_type=code&scope=email+openid+phone&redirect_uri=${encodeURIComponent(REDIRECT_URI)}`;
+};
+
+export const getSignupUrl = () => {
+    return `https://${COGNITO_DOMAIN}/signup?client_id=${CLIENT_ID}&response_type=code&scope=email+openid+phone&redirect_uri=${encodeURIComponent(REDIRECT_URI)}`;
 };
