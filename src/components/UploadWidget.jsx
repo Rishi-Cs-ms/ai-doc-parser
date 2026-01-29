@@ -1,8 +1,8 @@
 import React, { useState, useRef } from 'react';
-import { UploadCloud, File, X, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { UploadCloud, File, X, CheckCircle, AlertCircle, Loader2, LogOut } from 'lucide-react';
 import apiClient from '../api/client';
 import axios from 'axios';
-import { isLoggedIn, getLoginUrl } from '../api/auth';
+import { isLoggedIn, getLoginUrl, logout } from '../api/auth';
 
 const UploadWidget = () => {
     const [selectedFile, setSelectedFile] = useState(null);
@@ -216,7 +216,7 @@ const UploadWidget = () => {
                 </div>
             )}
 
-            {/* Not Logged In State for Dropzone Overlay (Optional improvement) */}
+            {/* Not Logged In State for Dropzone Overlay */}
             {!isLoggedIn() && !selectedFile && (
                 <div className="mt-4 text-center">
                     <p className="text-slate-400 mb-4">You must be logged in to upload documents.</p>
@@ -225,6 +225,19 @@ const UploadWidget = () => {
                         className="px-6 py-2 rounded-lg bg-indigo-600 text-white font-medium hover:bg-indigo-500 transition-colors"
                     >
                         Login to Continue
+                    </button>
+                </div>
+            )}
+
+            {/* Logged In State: Show Logout Option if no file selected */}
+            {isLoggedIn() && !selectedFile && (
+                <div className="mt-4 text-center">
+                    <button
+                        onClick={logout}
+                        className="px-6 py-2 rounded-lg border border-red-500/20 text-red-400 hover:bg-red-500/10 transition-colors flex items-center gap-2 mx-auto"
+                    >
+                        <LogOut size={16} />
+                        Logout
                     </button>
                 </div>
             )}
