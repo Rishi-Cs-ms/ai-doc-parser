@@ -12,17 +12,23 @@ function App() {
 
   useEffect(() => {
     // Check for tokens in the URL hash (Implicit Flow)
+    console.log("Checking hash for tokens:", window.location.hash);
     if (window.location.hash) {
       const params = new URLSearchParams(window.location.hash.substring(1));
       const idToken = params.get('id_token');
       const accessToken = params.get('access_token');
 
+      console.log("Parsed Tokens:", { idToken: !!idToken, accessToken: !!accessToken });
+
       if (idToken && accessToken) {
+        console.log("Storing tokens...");
         storeTokens(idToken, accessToken);
         // Clear the hash from the URL so the user doesn't see the ugly tokens
         window.history.replaceState({}, document.title, window.location.pathname);
-        // Force re-render or navigation if needed, though state change might be enough
-        // navigate(location.pathname, { replace: true }); 
+        console.log("Tokens stored and hash cleared.");
+        // Force update auth state in other components if they are listening to storage (they aren't reactive by default)
+        // A reload is a brute force way to ensure everything updates:
+        window.location.reload();
       }
     }
   }, [location]);

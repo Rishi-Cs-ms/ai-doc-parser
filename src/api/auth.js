@@ -3,6 +3,7 @@ const CLIENT_ID = "52v409gv203dm0vvofn4h179q1";
 const REDIRECT_URI = "https://ai-doc-parser.rishimajmudar.me";
 
 export const storeTokens = (idToken, accessToken) => {
+    console.log("auth.js: storeTokens called");
     if (idToken) localStorage.setItem("id_token", idToken);
     if (accessToken) localStorage.setItem("access_token", accessToken);
 };
@@ -21,12 +22,18 @@ export const logout = () => {
 
 export const isLoggedIn = () => {
     const token = localStorage.getItem("id_token");
-    if (!token) return false;
+    if (!token) {
+        console.log("isLoggedIn: No id_token found");
+        return false;
+    }
 
     try {
         const payload = JSON.parse(atob(token.split(".")[1]));
-        return payload.exp * 1000 > Date.now();
+        const isValid = payload.exp * 1000 > Date.now();
+        if (!isValid) console.log("isLoggedIn: Token expired");
+        return isValid;
     } catch (e) {
+        console.error("isLoggedIn: Error parsing token", e);
         return false;
     }
 };
