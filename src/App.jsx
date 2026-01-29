@@ -4,32 +4,32 @@ import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import DataView from './pages/DataView';
 import Upload from './pages/Upload';
-import { storeTokens } from './api/auth';
+import { exchangeCodeForTokens } from './api/auth';
 
 function App() {
   const location = useLocation();
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check for tokens in the URL hash (Implicit Flow)
-    console.log("Checking hash for tokens:", window.location.hash);
-    if (window.location.hash) {
-      const params = new URLSearchParams(window.location.hash.substring(1));
-      const idToken = params.get('id_token');
-      const accessToken = params.get('access_token');
+    const queryParams = new URLSearchParams(location.search);
+    const code = queryParams.get('code');
 
-      console.log("Parsed Tokens:", { idToken: !!idToken, accessToken: !!accessToken });
-
-      if (idToken && accessToken) {
-        console.log("Storing tokens...");
-        storeTokens(idToken, accessToken);
-        // Clear the hash from the URL so the user doesn't see the ugly tokens
-        window.history.replaceState({}, document.title, window.location.pathname);
-        console.log("Tokens stored and hash cleared.");
-        // Force update auth state in other components if they are listening to storage (they aren't reactive by default)
-        // A reload is a brute force way to ensure everything updates:
-        window.location.reload();
-      }
+    if (code) {
+      console.log("Authorization code found:", code);
+      const handleAuth = async () => {
+        try {
+          await exchangeCodeForTokens(code);
+          console.log("Tokens exchanged successfully.");
+          // Remove the code parameter from the URL to prevent re-submission and clean up UI
+          window.history.replaceState({}, document.title, window.location.pathname);
+          // Force reload to ensure auth state propogates
+          window.location.reload();
+        } catch (error) {
+          console.error('Failed to exchange code:', error);
+          // Optionally show error to user
+        }
+      };
+      handleAuth();
     }
   }, [location]);
 

@@ -2,6 +2,36 @@ const COGNITO_DOMAIN = "ca-central-10vcciz7st.auth.ca-central-1.amazoncognito.co
 const CLIENT_ID = "52v409gv203dm0vvofn4h179q1";
 const REDIRECT_URI = "https://ai-doc-parser.rishimajmudar.me";
 
+export const exchangeCodeForTokens = async (code) => {
+    const params = new URLSearchParams();
+    params.append("grant_type", "authorization_code");
+    params.append("client_id", CLIENT_ID);
+    params.append("code", code);
+    params.append("redirect_uri", REDIRECT_URI);
+
+    try {
+        const response = await fetch(`https://${COGNITO_DOMAIN}/oauth2/token`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: params,
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || "Failed to exchange code for tokens");
+        }
+
+        const tokens = await response.json();
+        storeTokens(tokens.id_token, tokens.access_token);
+        return tokens;
+    } catch (error) {
+        console.error("Token exchange error:", error);
+        throw error;
+    }
+};
+
 export const storeTokens = (idToken, accessToken) => {
     console.log("auth.js: storeTokens called");
     if (idToken) localStorage.setItem("id_token", idToken);
@@ -39,6 +69,5 @@ export const isLoggedIn = () => {
 };
 
 export const getLoginUrl = () => {
-    // response_type=token so that we get id_token and access_token in the hash
-    return `https://${COGNITO_DOMAIN}/login?client_id=${CLIENT_ID}&response_type=token&scope=email+openid+phone&redirect_uri=${REDIRECT_URI}`;
+    return `https://${COGNITO_DOMAIN}/login?client_id=${CLIENT_ID}&response_type=code&scope=email+openid+profile&redirect_uri=${REDIRECT_URI}`;
 };
