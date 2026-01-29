@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { UploadCloud, File, X, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import apiClient from '../api/client';
 import axios from 'axios';
 
 const UploadWidget = () => {
@@ -72,15 +73,15 @@ const UploadWidget = () => {
         setUploadProgress(0);
 
         try {
-            // Step 1: Get Pre-signed URL
-            const response = await axios.post(API_ENDPOINT, {
+            // Step 1: Get Pre-signed URL using our apiClient (which adds the Auth header)
+            const response = await apiClient.post(API_ENDPOINT, {
                 fileName: selectedFile.name,
                 contentType: selectedFile.type
             });
 
             const { uploadUrl } = response.data;
 
-            // Step 2: Upload to S3 using PUT
+            // Step 2: Upload to S3 using PUT (using vanilla axios because S3 doesn't want our Auth header)
             await axios.put(uploadUrl, selectedFile, {
                 headers: {
                     'Content-Type': selectedFile.type
@@ -187,19 +188,42 @@ const UploadWidget = () => {
                     )}
 
                     {/* Upload Button */}
+                    {isLoggedIn() ? (
+                        <button
+                            onClick={handleUpload}
+                            disabled={status === 'uploading' || status === 'success'}
+                            className="w-full btn-glow flex items-center justify-center gap-3 group"
+                        >
+                            {status === 'uploading' ? (
+                                <Loader2 size={24} className="animate-spin" />
+                            ) : (
+                                <>
+                                    <UploadCloud size={24} className="group-hover:-translate-y-1 transition-transform" />
+                                    <span>{status === 'success' ? 'Uploaded' : 'Start Upload'}</span>
+                                </>
+                            )}
+                        </button>
+                    ) : (
+                        <button
+                            onClick={() => window.location.href = getLoginUrl()}
+                            className="w-full py-4 rounded-xl bg-slate-700/50 text-slate-300 font-medium hover:bg-indigo-600 hover:text-white transition-all flex items-center justify-center gap-2"
+                        >
+                            <UploadCloud size={20} />
+                            Login to Upload
+                        </button>
+                    )}
+                </div>
+            )}
+
+            {/* Not Logged In State for Dropzone Overlay (Optional improvement) */}
+            {!isLoggedIn() && !selectedFile && (
+                <div className="mt-4 text-center">
+                    <p className="text-slate-400 mb-4">You must be logged in to upload documents.</p>
                     <button
-                        onClick={handleUpload}
-                        disabled={status === 'uploading' || status === 'success'}
-                        className="w-full btn-glow flex items-center justify-center gap-3 group"
+                        onClick={() => window.location.href = getLoginUrl()}
+                        className="px-6 py-2 rounded-lg bg-indigo-600 text-white font-medium hover:bg-indigo-500 transition-colors"
                     >
-                        {status === 'uploading' ? (
-                            <Loader2 size={24} className="animate-spin" />
-                        ) : (
-                            <>
-                                <UploadCloud size={24} className="group-hover:-translate-y-1 transition-transform" />
-                                <span>{status === 'success' ? 'Uploaded' : 'Start Upload'}</span>
-                            </>
-                        )}
+                        Login to Continue
                     </button>
                 </div>
             )}

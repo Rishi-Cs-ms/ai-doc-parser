@@ -1,11 +1,34 @@
-import React, { Suspense } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import React, { Suspense, useEffect } from 'react';
+import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import DataView from './pages/DataView';
 import Upload from './pages/Upload';
+import { exchangeCodeForTokens } from './api/auth';
 
 function App() {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const code = queryParams.get('code');
+
+    if (code) {
+      const handleAuth = async () => {
+        try {
+          await exchangeCodeForTokens(code);
+          // Remove the code parameter from the URL
+          navigate(location.pathname, { replace: true });
+        } catch (error) {
+          console.error('Failed to exchange code:', error);
+          // Optionally show error to user
+        }
+      };
+      handleAuth();
+    }
+  }, [location, navigate]);
+
   const columnConfigs = {
     resume: ['name', 'email', 'phone', 'location', 'skills', 'education', 'experience', 'projects'],
     invoice: ['invoice_number', 'invoice_date', 'vendor_name', 'total_amount', 'tax', 'currency'],
@@ -15,73 +38,71 @@ function App() {
   };
 
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Dashboard />} />
-          <Route path="upload" element={<Upload />} />
+    <Routes>
+      <Route path="/" element={<Layout />}>
+        <Route index element={<Dashboard />} />
+        <Route path="upload" element={<Upload />} />
 
-          <Route
-            path="resume"
-            element={
-              <DataView
-                endpoint="/resume"
-                title="Resumes"
-                subtitle="Parsed resume data from applicants"
-                columns={columnConfigs.resume}
-              />
-            }
-          />
+        <Route
+          path="resume"
+          element={
+            <DataView
+              endpoint="/resume"
+              title="Resumes"
+              subtitle="Parsed resume data from applicants"
+              columns={columnConfigs.resume}
+            />
+          }
+        />
 
-          <Route
-            path="loan"
-            element={
-              <DataView
-                endpoint="/loan"
-                title="Loans"
-                subtitle="Loan application documents"
-                columns={columnConfigs.loan}
-              />
-            }
-          />
-          <Route
-            path="invoice"
-            element={
-              <DataView
-                endpoint="/invoice"
-                title="Invoices"
-                subtitle="Processed invoice data"
-                columns={columnConfigs.invoice}
-              />
-            }
-          />
-          <Route
-            path="passport"
-            element={
-              <DataView
-                endpoint="/passport"
-                title="Passports"
-                subtitle="Passport identity extractions"
-                columns={columnConfigs.passport}
-              />
-            }
-          />
-          <Route
-            path="idproof"
-            element={
-              <DataView
-                endpoint="/idproof"
-                title="ID Proofs"
-                subtitle="Identity verification documents"
-                columns={columnConfigs.idproof}
-              />
-            }
-          />
+        <Route
+          path="loan"
+          element={
+            <DataView
+              endpoint="/loan"
+              title="Loans"
+              subtitle="Loan application documents"
+              columns={columnConfigs.loan}
+            />
+          }
+        />
+        <Route
+          path="invoice"
+          element={
+            <DataView
+              endpoint="/invoice"
+              title="Invoices"
+              subtitle="Processed invoice data"
+              columns={columnConfigs.invoice}
+            />
+          }
+        />
+        <Route
+          path="passport"
+          element={
+            <DataView
+              endpoint="/passport"
+              title="Passports"
+              subtitle="Passport identity extractions"
+              columns={columnConfigs.passport}
+            />
+          }
+        />
+        <Route
+          path="idproof"
+          element={
+            <DataView
+              endpoint="/idproof"
+              title="ID Proofs"
+              subtitle="Identity verification documents"
+              columns={columnConfigs.idproof}
+            />
+          }
+        />
 
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Route>
+    </Routes>
   );
 }
 

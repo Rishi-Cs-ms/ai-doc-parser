@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
     LayoutDashboard,
@@ -11,14 +11,33 @@ import {
     ChevronDown,
     Menu,
     X,
-    UploadCloud
+    UploadCloud,
+    LogIn,
+    LogOut,
+    User
 } from 'lucide-react';
+import { isLoggedIn, logout, getLoginUrl } from '../api/auth';
 
 const Layout = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [authenticated, setAuthenticated] = useState(isLoggedIn());
+
+    useEffect(() => {
+        // Update auth state whenever location changes (to catch token updates)
+        setAuthenticated(isLoggedIn());
+    }, [location]);
+
+    const handleLogin = () => {
+        window.location.href = getLoginUrl();
+    };
+
+    const handleLogout = () => {
+        logout();
+        setAuthenticated(false);
+    };
 
     const navItems = [
         { name: 'Dashboard', path: '/', icon: <LayoutDashboard size={20} /> },
@@ -113,8 +132,28 @@ const Layout = () => {
 
             {/* Main Content */}
             <main className="flex-1 pt-20 lg:pt-8 lg:ml-20 xl:ml-72 p-4 md:p-6 lg:p-10 w-full max-w-[100vw] overflow-x-hidden transition-all duration-300">
-                {/* Top Dropdown for Quick Navigation */}
-                <div className="w-full flex justify-end mb-8 relative z-30 px-2 sm:px-0">
+                {/* Top Headers for Quick Navigation & Auth */}
+                <div className="w-full flex justify-end items-center gap-4 mb-8 relative z-30 px-2 sm:px-0">
+                    <button
+                        onClick={authenticated ? handleLogout : handleLogin}
+                        className={`flex items-center gap-2 px-4 py-3 rounded-full border transition-all text-sm font-medium
+                            ${authenticated
+                                ? 'bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20'
+                                : 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400 hover:bg-indigo-500/20'}`}
+                    >
+                        {authenticated ? (
+                            <>
+                                <LogOut size={16} />
+                                <span className="hidden sm:inline">Logout</span>
+                            </>
+                        ) : (
+                            <>
+                                <LogIn size={16} />
+                                <span className="hidden sm:inline">Login</span>
+                            </>
+                        )}
+                    </button>
+
                     <div className="relative max-w-full">
                         <button
                             onClick={() => setDropdownOpen(!dropdownOpen)}
