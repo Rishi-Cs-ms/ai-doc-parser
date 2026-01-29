@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { UploadCloud, File, X, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import apiClient from '../api/client';
 import axios from 'axios';
+import { isLoggedIn, getLoginUrl } from '../api/auth';
 
 const UploadWidget = () => {
     const [selectedFile, setSelectedFile] = useState(null);
