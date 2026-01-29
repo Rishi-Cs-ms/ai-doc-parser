@@ -1,4 +1,4 @@
-const COGNITO_DOMAIN = "ai-doc-parser.auth.ca-central-1.amazoncognito.com"; // Replace with your actual Cognito domain
+const COGNITO_DOMAIN = "ca-central-10vcciz7st.auth.ca-central-1.amazoncognito.com"; // Replace with your actual Cognito domain
 const CLIENT_ID = "52v409gv203dm0vvofn4h179q1";
 const REDIRECT_URI = "https://ai-doc-parser.rishimajmudar.me";
 
@@ -45,7 +45,8 @@ export const logout = () => {
     localStorage.removeItem("access_token");
     localStorage.removeItem("id_token");
     localStorage.removeItem("refresh_token");
-    window.location.href = "/";
+    const logoutUrl = `https://${COGNITO_DOMAIN}/logout?client_id=${CLIENT_ID}&logout_uri=${encodeURIComponent(REDIRECT_URI)}`;
+    window.location.href = logoutUrl;
 };
 
 export const isLoggedIn = () => {
@@ -53,5 +54,5 @@ export const isLoggedIn = () => {
 };
 
 export const getLoginUrl = () => {
-    return `https://${COGNITO_DOMAIN}/login?client_id=${CLIENT_ID}&response_type=code&scope=email+openid+profile&redirect_uri=${REDIRECT_URI}`;
+    return `https://${COGNITO_DOMAIN}/login?client_id=${CLIENT_ID}&response_type=code&scope=email+openid+phone&redirect_uri=${REDIRECT_URI}`;
 };
