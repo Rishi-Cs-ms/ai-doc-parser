@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { UploadCloud, File, X, CheckCircle, AlertCircle, Loader2, LogOut } from 'lucide-react';
 import apiClient from '../api/client';
 import axios from 'axios';
-import { isLoggedIn, getLoginUrl, logout, getAccessToken } from '../api/auth';
+import { isLoggedIn, getLoginUrl, logout, getIdToken } from '../api/auth';
 
 const UploadWidget = () => {
     const [selectedFile, setSelectedFile] = useState(null);
@@ -75,8 +75,8 @@ const UploadWidget = () => {
 
         try {
             // Explicitly getting token to ensure it's passed (though apiClient interceptor also handles it)
-            // REST API uses Access Token
-            const accessToken = getAccessToken();
+            // REST API (Cognito User Pool authorizer) uses ID Token
+            const idToken = getIdToken();
 
             // Step 1: Get Pre-signed URL using our apiClient
             const response = await apiClient.post(API_ENDPOINT, {
@@ -84,7 +84,7 @@ const UploadWidget = () => {
                 contentType: selectedFile.type
             }, {
                 headers: {
-                    Authorization: `Bearer ${accessToken}`
+                    Authorization: `Bearer ${idToken}`
                 }
             });
 

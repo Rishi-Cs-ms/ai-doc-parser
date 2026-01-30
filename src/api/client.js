@@ -17,26 +17,27 @@ const apiClient = axios.create({
 });
 
 // Add a request interceptor to intelligently choose the correct token
-// REST API (S3 upload) uses Access Token
-// HTTP API (DynamoDB) uses ID Token
+// REST API (Cognito User Pool authorizer) → ID Token
+// HTTP API (JWT authorizer) → Access Token
 apiClient.interceptors.request.use(
     (config) => {
-        // Check if this is a request to the REST API (S3 upload endpoint)
-        const isRestApiRequest = config.url?.includes('8h60njzxe8.execute-api.ca-central-1.amazonaws.com');
+        const url = config.url || "";
 
-        // Use access_token for REST API, id_token for HTTP API
-        const token = isRestApiRequest
-            ? localStorage.getItem("access_token")
-            : localStorage.getItem("id_token");
+        // REST API endpoints (S3 upload)
+        const isRestApi = url.startsWith("/upload");
+
+        // Correct token usage
+        const token = isRestApi
+            ? localStorage.getItem("id_token")      // REST API
+            : localStorage.getItem("access_token"); // HTTP API
 
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
+
         return config;
     },
-    (error) => {
-        return Promise.reject(error);
-    }
+    (error) => Promise.reject(error)
 );
 
 /* ---------- FETCH HELPER ---------- */
