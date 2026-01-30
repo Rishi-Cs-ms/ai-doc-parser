@@ -5,26 +5,26 @@ const HTTP_API_BASE_URL = import.meta.env.DEV
     ? "" // Vite dev proxy will handle routes starting with /api
     : "https://ai-doc-parser.rishimajmudar.me/api"; // CloudFront API domain
 
-const REST_API_BASE_URL = "https://8h60njzxe8.execute-api.ca-central-1.amazonaws.com";
+const S3_UPLOAD_API_BASE_URL = "https://jlmerqcowe.execute-api.ca-central-1.amazonaws.com";
 
 console.log("Current Environment:", import.meta.env.MODE);
 console.log("HTTP API Base URL:", HTTP_API_BASE_URL);
-console.log("REST API Base URL:", REST_API_BASE_URL);
+console.log("S3 Upload API Base URL:", S3_UPLOAD_API_BASE_URL);
 
-/* ---------- REST API CLIENT (ID TOKEN) ---------- */
-// REST API with Cognito User Pool authorizer → ID TOKEN ONLY
-export const restApiClient = axios.create({
-    baseURL: REST_API_BASE_URL,
+/* ---------- S3 UPLOAD API CLIENT (ACCESS TOKEN) ---------- */
+// HTTP API for S3 upload with JWT authorizer → ACCESS TOKEN
+export const s3UploadApiClient = axios.create({
+    baseURL: S3_UPLOAD_API_BASE_URL,
     headers: {
         "Content-Type": "application/json",
     },
 });
 
-restApiClient.interceptors.request.use(
+s3UploadApiClient.interceptors.request.use(
     (config) => {
-        const idToken = localStorage.getItem("id_token");
-        if (idToken) {
-            config.headers.Authorization = `Bearer ${idToken}`;
+        const accessToken = localStorage.getItem("access_token");
+        if (accessToken) {
+            config.headers.Authorization = `Bearer ${accessToken}`;
         }
         return config;
     },

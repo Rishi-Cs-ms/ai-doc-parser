@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { UploadCloud, File, X, CheckCircle, AlertCircle, Loader2, LogOut } from 'lucide-react';
-import { restApiClient } from '../api/client';
+import { s3UploadApiClient } from '../api/client';
 import axios from 'axios';
 import { isLoggedIn, getLoginUrl, logout } from '../api/auth';
 
@@ -74,8 +74,8 @@ const UploadWidget = () => {
         setUploadProgress(0);
 
         try {
-            // Step 1: Get Pre-signed URL using restApiClient (automatically adds ID token)
-            const response = await restApiClient.post('/first/upload', {
+            // Step 1: Get Pre-signed URL using s3UploadApiClient (automatically adds Access token)
+            const response = await s3UploadApiClient.post('/upload', {
                 fileName: selectedFile.name,
                 contentType: selectedFile.type
             });
