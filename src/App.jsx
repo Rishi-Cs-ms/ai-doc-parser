@@ -20,10 +20,13 @@ function App() {
         try {
           await exchangeCodeForTokens(code);
           console.log("Tokens exchanged successfully.");
-          // Remove the code parameter from the URL to prevent re-submission and clean up UI
-          window.history.replaceState({}, document.title, window.location.pathname);
-          // Force reload to ensure auth state propogates
-          window.location.reload();
+          // Use navigate to clear the code and update the URL without a full reload
+          // This ensures we stay within the React app context and don't hit 404s on the server
+          navigate('/', { replace: true });
+
+          // Optional: If we need to force a re-check of auth state in Layout, 
+          // we can trigger a custom event or context update. 
+          // Since Layout listens to location changes, this navigate should be sufficient.
         } catch (error) {
           console.error('Failed to exchange code:', error);
           // Optionally show error to user

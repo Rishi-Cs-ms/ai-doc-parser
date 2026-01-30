@@ -135,7 +135,7 @@ const Layout = () => {
                 {/* Top Headers for Quick Navigation & Auth */}
                 <div className="w-full flex justify-end items-center gap-4 mb-8 relative z-30 px-2 sm:px-0">
                     <button
-                        onClick={authenticated ? handleLogout : handleLogin}
+                        onClick={authenticated ? handleLogout : async () => window.location.href = await getLoginUrl()}
                         className={`flex items-center gap-2 px-4 py-3 rounded-full border transition-all text-sm font-medium
                             ${authenticated
                                 ? 'bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20'
@@ -187,8 +187,8 @@ const Layout = () => {
                 <div className="max-w-7xl mx-auto">
                     <Outlet />
                 </div>
-            </main>
-        </div>
+            </main >
+        </div >
     );
 };
 

@@ -1,13 +1,43 @@
-const COGNITO_DOMAIN = "ca-central-10vcciz7st.auth.ca-central-1.amazoncognito.com";
-const CLIENT_ID = "4g8jp8jrqffad7k0kionio9hdb";
+const COGNITO_DOMAIN = "ca-central-1sy011dk91.auth.ca-central-1.amazoncognito.com";
+const CLIENT_ID = "4m3cbg0ibvtdc9ab54vq2j1f6h";
 const REDIRECT_URI = "https://ai-doc-parser.rishimajmudar.me";
 
+// PKCE Helpers
+const generateRandomString = (length) => {
+    const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
+    let result = '';
+    const values = new Uint8Array(length);
+    crypto.getRandomValues(values);
+    for (let i = 0; i < length; i++) {
+        result += charset[values[i] % charset.length];
+    }
+    return result;
+};
+
+const sha256 = async (plain) => {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(plain);
+    const hash = await crypto.subtle.digest('SHA-256', data);
+    return btoa(String.fromCharCode(...new Uint8Array(hash)))
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=+$/, '');
+};
+
 export const exchangeCodeForTokens = async (code) => {
+    const codeVerifier = localStorage.getItem('code_verifier');
+
+    if (!codeVerifier) {
+        console.error("No code_verifier found. PKCE flow failed.");
+        throw new Error("PKCE validation failed: No code_verifier found");
+    }
+
     const params = new URLSearchParams();
     params.append("grant_type", "authorization_code");
     params.append("client_id", CLIENT_ID);
     params.append("code", code);
     params.append("redirect_uri", REDIRECT_URI);
+    params.append("code_verifier", codeVerifier);
 
     try {
         const response = await fetch(`https://${COGNITO_DOMAIN}/oauth2/token`, {
@@ -15,8 +45,10 @@ export const exchangeCodeForTokens = async (code) => {
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded",
             },
-            body: params,
+            body: params.toString(),
         });
+
+        console.log("Token exchange using domain:", COGNITO_DOMAIN);
 
         if (!response.ok) {
             const error = await response.json();
@@ -25,6 +57,11 @@ export const exchangeCodeForTokens = async (code) => {
         }
 
         const tokens = await response.json();
+        console.log("------------------------------------------");
+        console.log("Access Token:", tokens.access_token);
+        console.log("ID Token:", tokens.id_token);
+        console.log("Refresh Token:", tokens.refresh_token);
+        console.log("------------------------------------------");
         storeTokens(tokens.id_token, tokens.access_token);
         return tokens;
     } catch (error) {
@@ -70,10 +107,20 @@ export const isLoggedIn = () => {
     }
 };
 
-export const getLoginUrl = () => {
-    return `https://${COGNITO_DOMAIN}/login?client_id=${CLIENT_ID}&response_type=code&scope=email+openid+phone&redirect_uri=${encodeURIComponent(REDIRECT_URI)}`;
+export const getLoginUrl = async () => {
+    const codeVerifier = generateRandomString(128);
+    localStorage.setItem('code_verifier', codeVerifier);
+
+    const codeChallenge = await sha256(codeVerifier);
+
+    return `https://${COGNITO_DOMAIN}/login?client_id=${CLIENT_ID}&response_type=code&scope=email+openid+phone&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&code_challenge_method=S256&code_challenge=${codeChallenge}`;
 };
 
-export const getSignupUrl = () => {
-    return `https://${COGNITO_DOMAIN}/signup?client_id=${CLIENT_ID}&response_type=code&scope=email+openid+phone&redirect_uri=${encodeURIComponent(REDIRECT_URI)}`;
+export const getSignupUrl = async () => {
+    const codeVerifier = generateRandomString(128);
+    localStorage.setItem('code_verifier', codeVerifier);
+
+    const codeChallenge = await sha256(codeVerifier);
+
+    return `https://${COGNITO_DOMAIN}/signup?client_id=${CLIENT_ID}&response_type=code&scope=email+openid+phone&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&code_challenge_method=S256&code_challenge=${codeChallenge}`;
 };

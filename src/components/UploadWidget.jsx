@@ -221,7 +221,7 @@ const UploadWidget = () => {
                 <div className="mt-4 text-center">
                     <p className="text-slate-400 mb-4">You must be logged in to upload documents.</p>
                     <button
-                        onClick={() => window.location.href = getLoginUrl()}
+                        onClick={async () => window.location.href = await getLoginUrl()}
                         className="px-6 py-2 rounded-lg bg-indigo-600 text-white font-medium hover:bg-indigo-500 transition-colors"
                     >
                         Login to Continue
