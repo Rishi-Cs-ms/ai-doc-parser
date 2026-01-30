@@ -1,49 +1,64 @@
 import axios from "axios";
 
-/* ---------- API BASE URL ---------- */
-const API_BASE_URL = import.meta.env.DEV
+/* ---------- API BASE URLs ---------- */
+const HTTP_API_BASE_URL = import.meta.env.DEV
     ? "" // Vite dev proxy will handle routes starting with /api
     : "https://ai-doc-parser.rishimajmudar.me/api"; // CloudFront API domain
 
-console.log("Current Environment:", import.meta.env.MODE);
-console.log("API Base URL:", API_BASE_URL);
+const REST_API_BASE_URL = "https://8h60njzxe8.execute-api.ca-central-1.amazonaws.com";
 
-/* ---------- AXIOS INSTANCE ---------- */
-const apiClient = axios.create({
-    baseURL: API_BASE_URL,
+console.log("Current Environment:", import.meta.env.MODE);
+console.log("HTTP API Base URL:", HTTP_API_BASE_URL);
+console.log("REST API Base URL:", REST_API_BASE_URL);
+
+/* ---------- REST API CLIENT (ID TOKEN) ---------- */
+// REST API with Cognito User Pool authorizer → ID TOKEN ONLY
+export const restApiClient = axios.create({
+    baseURL: REST_API_BASE_URL,
     headers: {
         "Content-Type": "application/json",
     },
 });
 
-// Add a request interceptor to intelligently choose the correct token
-// REST API (Cognito User Pool authorizer) → ID Token
-// HTTP API (JWT authorizer) → Access Token
-apiClient.interceptors.request.use(
+restApiClient.interceptors.request.use(
     (config) => {
-        const url = config.url || "";
-
-        // REST API endpoints (S3 upload)
-        const isRestApi = url.startsWith("/upload");
-
-        // Correct token usage
-        const token = isRestApi
-            ? localStorage.getItem("id_token")      // REST API
-            : localStorage.getItem("access_token"); // HTTP API
-
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
+        const idToken = localStorage.getItem("id_token");
+        if (idToken) {
+            config.headers.Authorization = `Bearer ${idToken}`;
         }
-
         return config;
     },
     (error) => Promise.reject(error)
 );
 
+/* ---------- HTTP API CLIENT (ACCESS TOKEN) ---------- */
+// HTTP API with JWT authorizer → ACCESS TOKEN ONLY
+export const httpApiClient = axios.create({
+    baseURL: HTTP_API_BASE_URL,
+    headers: {
+        "Content-Type": "application/json",
+    },
+});
+
+httpApiClient.interceptors.request.use(
+    (config) => {
+        const accessToken = localStorage.getItem("access_token");
+        if (accessToken) {
+            config.headers.Authorization = `Bearer ${accessToken}`;
+        }
+        return config;
+    },
+    (error) => Promise.reject(error)
+);
+
+/* ---------- LEGACY DEFAULT EXPORT (HTTP API) ---------- */
+// For backward compatibility, default export is the HTTP API client
+const apiClient = httpApiClient;
+
 /* ---------- FETCH HELPER ---------- */
 export const fetchData = async (endpoint, limit = 20) => {
     try {
-        const response = await apiClient.get(`${endpoint}?limit=${limit}`);
+        const response = await httpApiClient.get(`${endpoint}?limit=${limit}`);
         return response.data;
     } catch (error) {
         console.error(`Error fetching data from ${endpoint}:`, error);
