@@ -16,10 +16,19 @@ const apiClient = axios.create({
     },
 });
 
-// Add a request interceptor to add the access token to the headers
+// Add a request interceptor to intelligently choose the correct token
+// REST API (S3 upload) uses Access Token
+// HTTP API (DynamoDB) uses ID Token
 apiClient.interceptors.request.use(
     (config) => {
-        const token = localStorage.getItem("id_token");
+        // Check if this is a request to the REST API (S3 upload endpoint)
+        const isRestApiRequest = config.url?.includes('8h60njzxe8.execute-api.ca-central-1.amazonaws.com');
+
+        // Use access_token for REST API, id_token for HTTP API
+        const token = isRestApiRequest
+            ? localStorage.getItem("access_token")
+            : localStorage.getItem("id_token");
+
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
