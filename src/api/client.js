@@ -11,8 +11,8 @@ console.log("Current Environment:", import.meta.env.MODE);
 console.log("HTTP API Base URL:", HTTP_API_BASE_URL);
 console.log("REST API Base URL:", REST_API_BASE_URL);
 
-/* ---------- REST API CLIENT (ID TOKEN) ---------- */
-// REST API with Cognito User Pool authorizer → ID TOKEN ONLY
+/* ---------- REST API CLIENT (NO AUTH FOR NOW) ---------- */
+// REST API for S3 upload - Authorization temporarily disabled
 export const restApiClient = axios.create({
     baseURL: REST_API_BASE_URL,
     headers: {
@@ -20,16 +20,7 @@ export const restApiClient = axios.create({
     },
 });
 
-restApiClient.interceptors.request.use(
-    (config) => {
-        const idToken = localStorage.getItem("id_token");
-        if (idToken) {
-            config.headers.Authorization = `Bearer ${idToken}`;
-        }
-        return config;
-    },
-    (error) => Promise.reject(error)
-);
+// No interceptor - no authorization header added
 
 /* ---------- HTTP API CLIENT (ACCESS TOKEN) ---------- */
 // HTTP API with JWT authorizer → ACCESS TOKEN ONLY
