@@ -206,7 +206,7 @@ const UploadWidget = () => {
                         </button>
                     ) : (
                         <button
-                            onClick={() => window.location.href = getLoginUrl()}
+                            onClick={async () => window.location.href = await getLoginUrl()}
                             className="w-full py-4 rounded-xl bg-slate-700/50 text-slate-300 font-medium hover:bg-indigo-600 hover:text-white transition-all flex items-center justify-center gap-2"
                         >
                             <UploadCloud size={20} />

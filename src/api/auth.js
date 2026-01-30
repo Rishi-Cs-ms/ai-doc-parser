@@ -48,7 +48,7 @@ export const exchangeCodeForTokens = async (code) => {
             body: params.toString(),
         });
 
-        console.log("Token exchange using domain:", COGNITO_DOMAIN);
+
 
         if (!response.ok) {
             const error = await response.json();
@@ -57,11 +57,6 @@ export const exchangeCodeForTokens = async (code) => {
         }
 
         const tokens = await response.json();
-        console.log("------------------------------------------");
-        console.log("Access Token:", tokens.access_token);
-        console.log("ID Token:", tokens.id_token);
-        console.log("Refresh Token:", tokens.refresh_token);
-        console.log("------------------------------------------");
         storeTokens(tokens.id_token, tokens.access_token);
         return tokens;
     } catch (error) {
