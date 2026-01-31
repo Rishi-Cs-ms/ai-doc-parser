@@ -75,14 +75,21 @@ const UploadWidget = () => {
 
         try {
             // Step 1: Get Pre-signed URL using s3UploadApiClient (automatically adds Access token)
+            console.log('Requesting pre-signed URL for:', selectedFile.name);
             const response = await s3UploadApiClient.post('/upload', {
                 fileName: selectedFile.name,
                 contentType: selectedFile.type
             });
 
+            console.log('Pre-signed URL response:', response.data);
             const { uploadUrl } = response.data;
 
+            if (!uploadUrl) {
+                throw new Error('No upload URL received from server');
+            }
+
             // Step 2: Upload to S3 using PUT (using vanilla axios because S3 doesn't want our Auth header)
+            console.log('Uploading file to S3...');
             await axios.put(uploadUrl, selectedFile, {
                 headers: {
                     'Content-Type': selectedFile.type
@@ -93,11 +100,26 @@ const UploadWidget = () => {
                 }
             });
 
+            console.log('Upload successful!');
             setStatus('success');
             setUploadProgress(100);
         } catch (error) {
             console.error('Upload failed:', error);
-            setErrorMessage(error.message || 'Upload failed. Please try again.');
+            console.error('Error response:', error.response?.data);
+            console.error('Error status:', error.response?.status);
+
+            let errorMsg = 'Upload failed. Please try again.';
+            if (error.response?.status === 401) {
+                errorMsg = 'Authentication failed. Please log in again.';
+            } else if (error.response?.status === 403) {
+                errorMsg = 'Access denied. Check your permissions.';
+            } else if (error.response?.data?.message) {
+                errorMsg = error.response.data.message;
+            } else if (error.message) {
+                errorMsg = error.message;
+            }
+
+            setErrorMessage(errorMsg);
             setStatus('error');
         }
     };
