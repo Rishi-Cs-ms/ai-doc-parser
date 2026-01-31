@@ -23,9 +23,16 @@ export const s3UploadApiClient = axios.create({
 s3UploadApiClient.interceptors.request.use(
     (config) => {
         const accessToken = localStorage.getItem("access_token");
+        const idToken = localStorage.getItem("id_token");
+
+        // Send both tokens - API Gateway can use whichever it needs
         if (accessToken) {
             config.headers.Authorization = `Bearer ${accessToken}`;
         }
+        if (idToken) {
+            config.headers['X-ID-Token'] = idToken;
+        }
+
         return config;
     },
     (error) => Promise.reject(error)
@@ -43,9 +50,16 @@ export const httpApiClient = axios.create({
 httpApiClient.interceptors.request.use(
     (config) => {
         const accessToken = localStorage.getItem("access_token");
+        const idToken = localStorage.getItem("id_token");
+
+        // Send both tokens - API Gateway can use whichever it needs
         if (accessToken) {
             config.headers.Authorization = `Bearer ${accessToken}`;
         }
+        if (idToken) {
+            config.headers['X-ID-Token'] = idToken;
+        }
+
         return config;
     },
     (error) => Promise.reject(error)
