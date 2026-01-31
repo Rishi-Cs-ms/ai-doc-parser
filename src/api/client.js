@@ -57,7 +57,7 @@ httpApiClient.interceptors.request.use(
             config.headers.Authorization = `Bearer ${accessToken}`;
         }
         if (idToken) {
-            config.headers['X-ID-Token'] = idToken;
+            config.headers["x-id-token"] = idToken;
         }
 
         return config;
