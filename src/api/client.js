@@ -42,19 +42,18 @@ s3UploadApiClient.interceptors.request.use(
 // HTTP API with JWT authorizer → ACCESS TOKEN ONLY
 export const httpApiClient = axios.create({
     baseURL: HTTP_API_BASE_URL,
+    headers: {
+        "Content-Type": "application/json",
+    },
 });
 
 httpApiClient.interceptors.request.use(
     (config) => {
         const accessToken = localStorage.getItem("access_token");
-        const idToken = localStorage.getItem("id_token");
 
-        // Send both tokens - API Gateway can use whichever it needs
+        // Send Access Token for JWT authorizer
         if (accessToken) {
             config.headers.Authorization = `Bearer ${accessToken}`;
-        }
-        if (idToken) {
-            config.headers["x-id-token"] = idToken;
         }
 
         return config;
