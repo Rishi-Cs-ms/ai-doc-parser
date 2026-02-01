@@ -42,9 +42,6 @@ s3UploadApiClient.interceptors.request.use(
 // HTTP API with JWT authorizer → ACCESS TOKEN ONLY
 export const httpApiClient = axios.create({
     baseURL: HTTP_API_BASE_URL,
-    headers: {
-        "Content-Type": "application/json",
-    },
 });
 
 httpApiClient.interceptors.request.use(
