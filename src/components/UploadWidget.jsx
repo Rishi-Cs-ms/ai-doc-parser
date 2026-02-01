@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { UploadCloud, File, X, CheckCircle, AlertCircle, Loader2, LogOut } from 'lucide-react';
 import { s3UploadApiClient } from '../api/client';
 import axios from 'axios';
-import { isLoggedIn, getLoginUrl, logout } from '../api/auth';
+import { isLoggedIn, getLoginUrl, logout, getCurrentUser } from '../api/auth';
 
 const UploadWidget = () => {
     const [selectedFile, setSelectedFile] = useState(null);
@@ -74,11 +74,15 @@ const UploadWidget = () => {
         setUploadProgress(0);
 
         try {
+            const user = getCurrentUser();
+            const username = user ? user.username : 'anonymous';
+
             // Step 1: Get Pre-signed URL using s3UploadApiClient (automatically adds Access token)
-            console.log('Requesting pre-signed URL for:', selectedFile.name);
+            console.log('Requesting pre-signed URL for:', selectedFile.name, 'User:', username);
             const response = await s3UploadApiClient.post('/upload', {
                 fileName: selectedFile.name,
-                contentType: selectedFile.type
+                contentType: selectedFile.type,
+                username: username
             });
 
             console.log('Pre-signed URL response:', response.data);

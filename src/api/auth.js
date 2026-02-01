@@ -102,6 +102,24 @@ export const isLoggedIn = () => {
     }
 };
 
+export const getCurrentUser = () => {
+    const token = localStorage.getItem("id_token");
+    if (!token) return null;
+
+    try {
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        return {
+            sub: payload.sub,
+            username: payload['cognito:username'] || payload.username || payload.email || 'anonymous',
+            email: payload.email,
+            groups: payload['cognito:groups'] || []
+        };
+    } catch (e) {
+        console.error("Error parsing user token:", e);
+        return null;
+    }
+};
+
 export const getLoginUrl = async () => {
     const codeVerifier = generateRandomString(128);
     localStorage.setItem('code_verifier', codeVerifier);
