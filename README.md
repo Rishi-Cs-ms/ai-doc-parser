@@ -1,16 +1,77 @@
-# React + Vite
+# AI Document Parser (Nexus)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A sophisticated, cloud-native document automation platform designed to streamline the extraction and analysis of business-critical documents. This project demonstrates a production-ready integration of modern frontend technologies with AWS cloud services.
 
-Currently, two official plugins are available:
+## 🚀 Overview
+The **AI Document Parser** provides a seamless, secure, and intelligent environment for managing various document types. It leverages AWS's robust infrastructure to handle everything from secure user authentication to high-speed document processing and structured data visualization.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## React Compiler
+## 🛠 Tech Stack
+| Tier | Technologies |
+| :--- | :--- |
+| **Frontend** | React 19 (Vite), Tailwind CSS 4, Lucide React, Axios |
+| **Authentication** | AWS Cognito (OAuth 2.0 with PKCE Flow) |
+| **Storage** | AWS S3 (Direct Uploads via Pre-signed URLs) |
+| **Backend API** | AWS API Gateway (RESTful), AWS Lambda |
+| **Analysis** | AI-driven extraction (Resumes, Invoices, Loans, Passports, ID Proofs) |
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## ✨ Key Features
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### 🔐 Enterprise-Grade Security
+- **OAuth 2.0 with PKCE**: Implements the most secure flow for Public Clients (SPAs), ensuring tokens are exchanged securely without exposing secrets.
+- **JWT Authorization**: All API requests are protected by Cognito-issued Access and ID tokens.
+
+### 📤 Optimized File Handling
+- **Pre-signed URLs**: Uploads bypass application servers, sending files directly to AWS S3 using short-lived signed URLs. This ensures scalability and reduces latency.
+- **Progress Tracking**: Real-time upload progress bars and status indicators for a smooth user experience.
+
+### 📊 Intelligent Command Center
+- **Categorized Dashboards**: Dedicated views for Resumes, Invoices, Loans, and Identity Documents.
+- **Rich UI/UX**: A modern "Glassmorphism" design system built with Tailwind CSS, featuring smooth transitions and responsive layouts.
+- **Search & Filter**: Structured data tables with search capabilities to quickly locate extracted information.
+
+---
+
+## 🏗 Architecture & Workflow
+
+1.  **Authentication**: Users login via the Cognito Hosted UI. The application captures the authorization code and exchanges it for JWT tokens using a generated `code_verifier`.
+2.  **Upload Flow**:
+    - Frontend requests a pre-signed `PUT` URL from API Gateway.
+    - API Gateway (guarded by a JWT Authorizer) generates the URL via a Lambda function.
+    - Frontend performs a direct upload to S3, including the necessary metadata.
+3.  **Data Ingestion**: Once uploaded, the back-end (Lambda/Textract/Rekognition) processes the document and stores structured data.
+4.  **Data Rendering**: The React frontend fetches this structured data via authenticated GET requests, rendering it in dynamic, searchable tables.
+
+---
+
+## 👔 Recruiter's Corner: Engineering Excellence
+
+This project showcases several advanced engineering concepts:
+
+- **Cloud Integration**: Not just using a backend, but directly interacting with multi-service AWS architectures.
+- **Security First**: Deep understanding of OAuth2 standards and secure token management in the browser.
+- **Aesthetic Engineering**: Focus on visual excellence and performance, ensuring the app looks and feels premium while remaining highly functional.
+- **Code Scalability**: Modular React components, centralized API clients with request interceptors, and a clean separation of concerns.
+
+---
+
+## ⚙️ Local Development
+
+1.  **Clone & Install**:
+    ```bash
+    git clone https://github.com/your-username/aws-data-dashboard.git
+    cd aws-data-dashboard
+    npm install
+    ```
+2.  **Run**:
+    ```bash
+    npm run dev
+    ```
+
+---
+
+**Developed by Rishi Majmudar**  
+*Cloud Integrations | Frontend Architecture | AI Solutions*
