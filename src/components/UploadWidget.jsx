@@ -130,6 +130,11 @@ const UploadWidget = () => {
 
     return (
         <div className="glass-card p-10 flex flex-col items-center w-full">
+            <div className="mb-8 text-center max-w-2xl">
+                <p className="text-slate-400 font-medium">
+                    Supported documents are <span className="text-indigo-300">resume, loans, invoices, idproofs, and passports</span> only. Other documents are not analyzed using AI.
+                </p>
+            </div>
 
             {/* Drag & Drop Zone */}
             <div

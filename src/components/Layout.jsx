@@ -16,7 +16,7 @@ import {
     LogOut,
     User
 } from 'lucide-react';
-import { isLoggedIn, logout, getLoginUrl } from '../api/auth';
+import { isLoggedIn, logout, getLoginUrl, getCurrentUser } from '../api/auth';
 
 const Layout = () => {
     const location = useLocation();
@@ -24,10 +24,17 @@ const Layout = () => {
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [authenticated, setAuthenticated] = useState(isLoggedIn());
+    const [user, setUser] = useState(null);
 
     useEffect(() => {
         // Update auth state whenever location changes (to catch token updates)
-        setAuthenticated(isLoggedIn());
+        const loggedIn = isLoggedIn();
+        setAuthenticated(loggedIn);
+        if (loggedIn) {
+            setUser(getCurrentUser());
+        } else {
+            setUser(null);
+        }
     }, [location]);
 
     const handleLogin = () => {
@@ -37,6 +44,7 @@ const Layout = () => {
     const handleLogout = () => {
         logout();
         setAuthenticated(false);
+        setUser(null);
     };
 
     const navItems = [
@@ -68,8 +76,14 @@ const Layout = () => {
             <header className="lg:hidden fixed top-0 left-0 right-0 z-50 h-16 glass-card !rounded-none !border-x-0 !border-t-0 flex items-center justify-between px-6">
                 <div className="flex items-center gap-2">
                     <Hexagon className="text-indigo-400" size={24} />
-                    <span className="font-bold text-lg tracking-wide">NEXUS</span>
+                    <span className="font-bold text-lg tracking-wide uppercase">Ai- document parser</span>
                 </div>
+                {authenticated && user && (
+                    <div className="flex items-center gap-2 text-indigo-300 bg-indigo-500/10 px-3 py-1.5 rounded-full border border-indigo-500/20">
+                        <User size={14} />
+                        <span className="text-sm font-medium truncate max-w-[100px]">{user.username}</span>
+                    </div>
+                )}
                 <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="p-2 text-slate-400">
                     {mobileMenuOpen ? <X /> : <Menu />}
                 </button>
@@ -82,8 +96,8 @@ const Layout = () => {
                         <div className="absolute inset-0 bg-indigo-500 blur-lg opacity-40 group-hover:opacity-60 transition-opacity" />
                         <Hexagon className="text-white relative z-10" size={32} />
                     </div>
-                    <h1 className="hidden xl:block text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
-                        NEXUS
+                    <h1 className="hidden xl:block text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400 uppercase">
+                        Ai- document parser
                     </h1>
                 </div>
 
@@ -95,7 +109,7 @@ const Layout = () => {
                                 key={item.path}
                                 to={item.path}
                                 className={`flex items-center gap-4 p-3 rounded-xl transition-all duration-300 group
-                  ${isActive
+                                    ${isActive
                                         ? 'bg-indigo-500/10 text-white shadow-[0_0_15px_rgba(99,102,241,0.2)]'
                                         : 'text-slate-400 hover:text-white hover:bg-white/5'
                                     }`}
@@ -109,6 +123,21 @@ const Layout = () => {
                         );
                     })}
                 </nav>
+
+                {/* Desktop User Info */}
+                {authenticated && user && (
+                    <div className="px-6 mt-auto hidden xl:block">
+                        <div className="glass-card p-4 flex items-center gap-3 border border-indigo-500/20 bg-indigo-500/5">
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold">
+                                {user.username.charAt(0).toUpperCase()}
+                            </div>
+                            <div className="min-w-0">
+                                <p className="text-white text-sm font-semibold truncate">{user.username}</p>
+                                <p className="text-slate-500 text-xs truncate">{user.email}</p>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </aside>
 
             {/* Mobile Menu */}
@@ -134,6 +163,15 @@ const Layout = () => {
             <main className="flex-1 pt-20 lg:pt-8 lg:ml-20 xl:ml-72 p-4 md:p-6 lg:p-10 w-full max-w-[100vw] overflow-x-hidden transition-all duration-300">
                 {/* Top Headers for Quick Navigation & Auth */}
                 <div className="w-full flex justify-end items-center gap-4 mb-8 relative z-30 px-2 sm:px-0">
+                    {authenticated && user && (
+                        <div className="hidden sm:flex items-center gap-3 px-4 py-2.5 rounded-full bg-white/5 border border-white/10">
+                            <div className="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400">
+                                <User size={16} />
+                            </div>
+                            <span className="text-sm font-medium text-slate-200">{user.username}</span>
+                        </div>
+                    )}
+
                     <button
                         onClick={authenticated ? handleLogout : async () => window.location.href = await getLoginUrl()}
                         className={`flex items-center gap-2 px-4 py-3 rounded-full border transition-all text-sm font-medium
