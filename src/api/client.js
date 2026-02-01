@@ -3,7 +3,7 @@ import axios from "axios";
 /* ---------- API BASE URLs ---------- */
 const HTTP_API_BASE_URL = import.meta.env.DEV
     ? "" // Vite dev proxy will handle routes starting with /api
-    : "https://ai-doc-parser.rishimajmudar.me/api"; // CloudFront API domain
+    : "https://88ag9ta6da.execute-api.ca-central-1.amazonaws.com"; // API Gateway for data fetching
 
 const S3_UPLOAD_API_BASE_URL = "https://jlmerqcowe.execute-api.ca-central-1.amazonaws.com";
 

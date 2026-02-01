@@ -37,11 +37,11 @@ function App() {
   }, [location]);
 
   const columnConfigs = {
-    resume: ['name', 'email', 'phone', 'location', 'skills', 'education', 'experience', 'projects'],
-    invoice: ['invoice_number', 'invoice_date', 'vendor_name', 'total_amount', 'tax', 'currency'],
-    passport: ['full_name', 'passport_number', 'nationality', 'date_of_birth', 'expiry_date'],
-    idproof: ['full_name', 'type_of_id', 'id_number', 'address', 'date_of_birth'],
-    loan: ['applicant_name', 'loan_type', 'loan_amount', 'interest_rate', 'tenure'],
+    resume: ['username', 'name', 'email', 'phone', 'location', 'skills', 'education', 'experience', 'projects'],
+    invoice: ['username', 'invoice_number', 'invoice_date', 'vendor_name', 'total_amount', 'tax', 'currency'],
+    passport: ['username', 'full_name', 'passport_number', 'nationality', 'date_of_birth', 'expiry_date'],
+    idproof: ['username', 'full_name', 'type_of_id', 'id_number', 'address', 'date_of_birth'],
+    loan: ['username', 'applicant_name', 'loan_type', 'loan_amount', 'interest_rate', 'tenure'],
   };
 
   return (
