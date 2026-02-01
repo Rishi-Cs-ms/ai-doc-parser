@@ -8,12 +8,22 @@ const DataTable = ({ items, isLoading, definedColumns }) => {
         if (!items) return [];
         return items.map(item => {
             let parsedData = {};
-            try {
-                const extracted = JSON.parse(item.extracted_data);
-                parsedData = extracted.data || extracted;
-            } catch (e) {
-                console.error("Failed to parse extracted_data", e);
-                parsedData = { error: "Parse Error" };
+
+            // Try to get data from aiResult (already an object) or extracted_data (JSON string)
+            const sourceData = item.aiResult || item.extracted_data;
+
+            if (sourceData) {
+                if (typeof sourceData === 'object') {
+                    parsedData = sourceData.data || sourceData;
+                } else {
+                    try {
+                        const extracted = JSON.parse(sourceData);
+                        parsedData = extracted.data || extracted;
+                    } catch (e) {
+                        console.error("Failed to parse source data", e);
+                        parsedData = { error: "Parse Error" };
+                    }
+                }
             }
 
             return {
@@ -31,13 +41,13 @@ const DataTable = ({ items, isLoading, definedColumns }) => {
         const allKeys = new Set();
         processedData.slice(0, 5).forEach(item => {
             Object.keys(item).forEach(key => {
-                if (!['items', 'extracted_data', 'parsedData', 'file_id', 'document_type', 's3_path', 'created_at', 'view_document_url'].includes(key)) {
+                if (!['items', 'extracted_data', 'aiResult', 'parsedData', 'file_id', 'documentId', 'userId', 'isAdmin', 'bucket', 'document_type', 'documentType', 's3_path', 'created_at', 'createdAt', 'view_document_url'].includes(key)) {
                     allKeys.add(key);
                 }
             });
         });
 
-        const priority = ['name', 'email', 'phone', 'location', 'skills', 'experience', 'education'];
+        const priority = ['username', 'name', 'email', 'phone', 'location', 'skills', 'experience', 'education'];
         return Array.from(allKeys).sort((a, b) => {
             const idxA = priority.indexOf(a);
             const idxB = priority.indexOf(b);
@@ -55,8 +65,8 @@ const DataTable = ({ items, isLoading, definedColumns }) => {
         return processedData.filter(row => {
             // Check top level fields and dynamic columns
             const searchableValues = [
-                row.file_id,
-                row.s3_path,
+                row.file_id || row.documentId,
+                row.s3_path || row.documentId,
                 ...columns.map(col => row[col])
             ];
 
@@ -66,9 +76,13 @@ const DataTable = ({ items, isLoading, definedColumns }) => {
         });
     }, [processedData, searchQuery, columns]);
 
-    const formatDate = (timestamp) => {
-        if (!timestamp) return 'N/A';
-        const date = new Date(timestamp * 1000);
+    const formatDate = (row) => {
+        const val = row.created_at || row.createdAt;
+        if (!val) return 'N/A';
+
+        const date = new Date(typeof val === 'number' ? val * 1000 : val);
+        if (isNaN(date.getTime())) return 'N/A';
+
         return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     };
 
@@ -128,41 +142,44 @@ const DataTable = ({ items, isLoading, definedColumns }) => {
                         </thead>
                         <tbody className="divide-y divide-white/5">
                             {filteredData.length > 0 ? (
-                                filteredData.map((row) => (
-                                    <tr key={row.file_id} className="group hover:bg-white/[0.04] transition-colors duration-200">
-                                        <td className="p-6 text-sm text-slate-400 whitespace-nowrap font-mono align-top">
-                                            {formatDate(row.created_at)}
-                                        </td>
-
-                                        {columns.map(col => (
-                                            <td key={`${row.file_id}-${col}`} className="p-6 min-w-[200px] text-sm text-slate-300 break-words whitespace-pre-wrap align-top" title={row[col]?.toString()}>
-                                                {row[col] ? row[col].toString() : <span className="text-slate-700">-</span>}
+                                filteredData.map((row) => {
+                                    const rowKey = row.file_id || row.documentId || Math.random().toString();
+                                    return (
+                                        <tr key={rowKey} className="group hover:bg-white/[0.04] transition-colors duration-200">
+                                            <td className="p-6 text-sm text-slate-400 whitespace-nowrap font-mono align-top">
+                                                {formatDate(row)}
                                             </td>
-                                        ))}
 
-                                        <td className="p-6 text-right align-top">
-                                            {row.view_document_url ? (
-                                                <a
-                                                    href={row.view_document_url}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500 hover:text-white transition-all shadow-lg hover:shadow-indigo-500/40"
-                                                    title="View Document"
-                                                >
-                                                    <ExternalLink size={18} />
-                                                </a>
-                                            ) : row.s3_path && (
-                                                <button
-                                                    className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500 hover:text-white transition-all shadow-lg hover:shadow-indigo-500/40"
-                                                    title="Copy S3 Path"
-                                                    onClick={() => navigator.clipboard.writeText(row.s3_path).then(() => alert('S3 Path copied!'))}
-                                                >
-                                                    <Download size={18} />
-                                                </button>
-                                            )}
-                                        </td>
-                                    </tr>
-                                ))
+                                            {columns.map(col => (
+                                                <td key={`${rowKey}-${col}`} className="p-6 min-w-[200px] text-sm text-slate-300 break-words whitespace-pre-wrap align-top" title={row[col]?.toString()}>
+                                                    {row[col] ? row[col].toString() : <span className="text-slate-700">-</span>}
+                                                </td>
+                                            ))}
+
+                                            <td className="p-6 text-right align-top">
+                                                {row.view_document_url ? (
+                                                    <a
+                                                        href={row.view_document_url}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500 hover:text-white transition-all shadow-lg hover:shadow-indigo-500/40"
+                                                        title="View Document"
+                                                    >
+                                                        <ExternalLink size={18} />
+                                                    </a>
+                                                ) : row.s3_path && (
+                                                    <button
+                                                        className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500 hover:text-white transition-all shadow-lg hover:shadow-indigo-500/40"
+                                                        title="Copy S3 Path"
+                                                        onClick={() => navigator.clipboard.writeText(row.s3_path).then(() => alert('S3 Path copied!'))}
+                                                    >
+                                                        <Download size={18} />
+                                                    </button>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    );
+                                })
                             ) : (
                                 <tr>
                                     <td colSpan={columns.length + 2} className="p-12 text-center text-slate-500">

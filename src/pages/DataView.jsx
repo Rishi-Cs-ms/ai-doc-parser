@@ -26,7 +26,9 @@ const DataView = ({ endpoint, title, subtitle, columns }) => {
         setError(null);
         try {
             const data = await fetchData(endpoint);
-            setItems(data.items || []);
+            // Handle both { items: [] } and direct [] response formats
+            const itemsList = Array.isArray(data) ? data : (data.items || []);
+            setItems(itemsList);
         } catch (err) {
             console.error('Failed to load data:', err);
             if (err.response?.status === 401) {
