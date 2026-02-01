@@ -70,9 +70,9 @@ httpApiClient.interceptors.request.use(
 const apiClient = httpApiClient;
 
 /* ---------- FETCH HELPER ---------- */
-export const fetchData = async (endpoint, limit = 20) => {
+export const fetchData = async (endpoint) => {
     try {
-        const response = await httpApiClient.get(`${endpoint}?limit=${limit}`);
+        const response = await httpApiClient.get(endpoint);
         return response.data;
     } catch (error) {
         console.error(`Error fetching data from ${endpoint}:`, error);
