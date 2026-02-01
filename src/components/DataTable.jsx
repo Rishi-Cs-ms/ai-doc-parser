@@ -41,7 +41,7 @@ const DataTable = ({ items, isLoading, definedColumns }) => {
         const allKeys = new Set();
         processedData.slice(0, 5).forEach(item => {
             Object.keys(item).forEach(key => {
-                if (!['items', 'count', 'extracted_data', 'aiResult', 'parsedData', 'file_id', 'documentId', 'userId', 'isAdmin', 'bucket', 'document_type', 'documentType', 's3_path', 's3Key', 'created_at', 'createdAt', 'view_document_url', 'downloadUrl'].includes(key)) {
+                if (!['items', 'count', 'extracted_data', 'aiResult', 'parsedData', 'file_id', 'documentId', 'userId', 'isAdmin', 'bucket', 'document_type', 'documentType', 's3_path', 's3Key', 'created_at', 'createdAt', 'view_document_url', 'downloadUrl', 'fileUrl'].includes(key)) {
                     allKeys.add(key);
                 }
             });
@@ -145,7 +145,7 @@ const DataTable = ({ items, isLoading, definedColumns }) => {
                             {filteredData.length > 0 ? (
                                 filteredData.map((row) => {
                                     const rowKey = row.file_id || row.documentId || Math.random().toString();
-                                    const docUrl = row.downloadUrl || row.view_document_url;
+                                    const docUrl = row.fileUrl || row.downloadUrl || row.view_document_url;
 
                                     return (
                                         <tr key={rowKey} className="group hover:bg-white/[0.04] transition-colors duration-200">
