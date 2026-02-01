@@ -41,7 +41,7 @@ const DataTable = ({ items, isLoading, definedColumns }) => {
         const allKeys = new Set();
         processedData.slice(0, 5).forEach(item => {
             Object.keys(item).forEach(key => {
-                if (!['items', 'extracted_data', 'aiResult', 'parsedData', 'file_id', 'documentId', 'userId', 'isAdmin', 'bucket', 'document_type', 'documentType', 's3_path', 'created_at', 'createdAt', 'view_document_url'].includes(key)) {
+                if (!['items', 'count', 'extracted_data', 'aiResult', 'parsedData', 'file_id', 'documentId', 'userId', 'isAdmin', 'bucket', 'document_type', 'documentType', 's3_path', 's3Key', 'created_at', 'createdAt', 'view_document_url', 'downloadUrl'].includes(key)) {
                     allKeys.add(key);
                 }
             });
@@ -67,6 +67,7 @@ const DataTable = ({ items, isLoading, definedColumns }) => {
             const searchableValues = [
                 row.file_id || row.documentId,
                 row.s3_path || row.documentId,
+                row.username,
                 ...columns.map(col => row[col])
             ];
 
@@ -144,6 +145,8 @@ const DataTable = ({ items, isLoading, definedColumns }) => {
                             {filteredData.length > 0 ? (
                                 filteredData.map((row) => {
                                     const rowKey = row.file_id || row.documentId || Math.random().toString();
+                                    const docUrl = row.downloadUrl || row.view_document_url;
+
                                     return (
                                         <tr key={rowKey} className="group hover:bg-white/[0.04] transition-colors duration-200">
                                             <td className="p-6 text-sm text-slate-400 whitespace-nowrap font-mono align-top">
@@ -157,9 +160,9 @@ const DataTable = ({ items, isLoading, definedColumns }) => {
                                             ))}
 
                                             <td className="p-6 text-right align-top">
-                                                {row.view_document_url ? (
+                                                {docUrl ? (
                                                     <a
-                                                        href={row.view_document_url}
+                                                        href={docUrl}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                         className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500 hover:text-white transition-all shadow-lg hover:shadow-indigo-500/40"
@@ -167,7 +170,7 @@ const DataTable = ({ items, isLoading, definedColumns }) => {
                                                     >
                                                         <ExternalLink size={18} />
                                                     </a>
-                                                ) : row.s3_path && (
+                                                ) : row.s3_path ? (
                                                     <button
                                                         className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500 hover:text-white transition-all shadow-lg hover:shadow-indigo-500/40"
                                                         title="Copy S3 Path"
@@ -175,7 +178,7 @@ const DataTable = ({ items, isLoading, definedColumns }) => {
                                                     >
                                                         <Download size={18} />
                                                     </button>
-                                                )}
+                                                ) : null}
                                             </td>
                                         </tr>
                                     );
