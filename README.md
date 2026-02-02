@@ -37,13 +37,53 @@ The **AI Document Parser** provides a seamless, secure, and intelligent environm
 
 ## 🏗 Architecture & Workflow
 
-1.  **Authentication**: Users login via the Cognito Hosted UI. The application captures the authorization code and exchanges it for JWT tokens using a generated `code_verifier`.
+```mermaid
+graph TD
+    %% Frontend & Auth
+    User((User)) -->|HTTPS| CF[CloudFront]
+    CF --> S3_Static[S3: Web Hosting]
+    CF -->|Secure View| S3_Docs[S3: Document Storage]
+    User -->|Login| Cognito[Cognito]
+    
+    %% API & Data Retrieval
+    User -->|GET /data| APIGW[API Gateway]
+    APIGW -->|Trigger| Lambda_Fetch[Lambda: Data Fetcher]
+    
+    subgraph "Efficient Data Tier"
+        Lambda_Fetch -->|Query via GSI| DDB[(DynamoDB)]
+        DDB -.- GSI[[GSI: username-index]]
+    end
+
+    %% The Processing Pipeline
+    User -->|Direct Upload| S3_Docs
+    S3_Docs -->|S3 Event Trigger| Lambda_AI[Lambda: AI Orchestrator]
+    
+    subgraph "The Sequential AI Handshake"
+        Lambda_AI -->|1. Raw Extraction| Textract[AWS Textract]
+        Textract -->|Extracted Text| Lambda_AI
+        
+        Lambda_AI -->|2. Intelligent Reasoning| Bedrock[Bedrock: Amazon Nova Lite]
+        Bedrock -->|3. Structured JSON| Lambda_AI
+    end
+    
+    Lambda_AI -->|4. Store Results| DDB
+```
+
+### ⚙️ The Engineering Workflow
+
+1.  **Authentication**: Users login via Cognito (OAuth 2.0 with PKCE). Tokens are managed in the browser and passed to all API calls for secure authorization.
 2.  **Upload Flow**:
-    - Frontend requests a pre-signed `PUT` URL from API Gateway.
-    - API Gateway (guarded by a JWT Authorizer) generates the URL via a Lambda function.
-    - Frontend performs a direct upload to S3, including the necessary metadata.
-3.  **Data Ingestion**: Once uploaded, the back-end (Lambda/Textract/Rekognition) processes the document and stores structured data.
-4.  **Data Rendering**: The React frontend fetches this structured data via authenticated GET requests, rendering it in dynamic, searchable tables.
+    *   Frontend requests a pre-signed URL from API Gateway.
+    *   Files are sent directly to the **Document S3 Bucket** via a secure `PUT` request.
+3.  **The AI Handshake (Processing)**:
+    *   An S3 Event triggers a Lambda function that orchestrates the extraction.
+    *   **AWS Textract** handles the initial OCR and layout analysis of the document.
+    *   The raw text is then passed to **Amazon Bedrock (Nova Lite)**, which uses LLM reasoning to extract contextually important fields (Skills, Amounts, Dates) into a clean, structured JSON format.
+4.  **Database Optimization (GSI)**:
+    *   Extracted data is stored in DynamoDB.
+    *   To ensure lightning-fast retrieval, we use a **Global Secondary Index (GSI)** on the `username` field. This allow the system to perform targeted queries rather than full table scans, ensuring performance even as the database grows.
+5.  **Secure Global Delivery**:
+    *   **AWS CloudFront** fronts both the web hosting bucket and the document storage bucket. This provides low-latency access, SSL encryption, and secure view links for all processed document artifacts.
 
 ## 🏗 Complete Project Architecture Diagram
 
