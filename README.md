@@ -45,6 +45,43 @@ The **AI Document Parser** provides a seamless, secure, and intelligent environm
 3.  **Data Ingestion**: Once uploaded, the back-end (Lambda/Textract/Rekognition) processes the document and stores structured data.
 4.  **Data Rendering**: The React frontend fetches this structured data via authenticated GET requests, rendering it in dynamic, searchable tables.
 
+## 🏗 Complete Project Architecture Diagram
+
+graph TD
+    %% User and Frontend
+    User((User)) -->|HTTPS| CF[AWS CloudFront]
+    CF -->|Serves Static Files| S3_Static[AWS S3: Web Hosting]
+    
+    %% Authentication Flow
+    User -->|Login| Cognito[AWS Cognito: User Pool]
+    Cognito -->|JWT Tokens| User
+    
+    %% API Interactions
+    User -->|Auth Header + Request| APIGW[AWS API Gateway]
+    
+    subgraph "Backend Services (Serverless)"
+        APIGW -->|Trigger| Lambda_Presigned[Lambda: Pre-signed URL Gen]
+        APIGW -->|Trigger| Lambda_Data[Lambda: Data Fetching]
+        
+        Lambda_Presigned -->|Returns URL| APIGW
+        Lambda_Data -->|Query| DDB[(Amazon DynamoDB)]
+    end
+    
+    %% Document Processing Flow
+    User -->|PUT Object| S3_Docs[AWS S3: Document Storage]
+    S3_Docs -->|Event Trigger| Lambda_Processor[Lambda: Document Processor]
+    
+    subgraph "AI Extraction Tier"
+        Lambda_Processor -->|Extract Text| Textract[AWS Textract / Rekognition]
+        Textract -->|Structured Result| Lambda_Processor
+        Lambda_Processor -->|Store Data| DDB
+    end
+
+    %% CI/CD Flow
+    GitHub[GitHub Repo] -->|Push| GHA[GitHub Actions]
+    GHA -->|Build & Deploy| S3_Static
+    GHA -->|Invalidate Cache| CF
+
 ---
 
 ## 👔 Recruiter's Corner: Engineering Excellence
