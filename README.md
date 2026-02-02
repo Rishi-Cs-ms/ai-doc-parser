@@ -47,6 +47,7 @@ The **AI Document Parser** provides a seamless, secure, and intelligent environm
 
 ## 🏗 Complete Project Architecture Diagram
 
+```mermaid
     graph TD
     %% User and Frontend
     User((User)) -->|HTTPS| CF[AWS CloudFront]
@@ -81,7 +82,7 @@ The **AI Document Parser** provides a seamless, secure, and intelligent environm
     GitHub[GitHub Repo] -->|Push| GHA[GitHub Actions]
     GHA -->|Build & Deploy| S3_Static
     GHA -->|Invalidate Cache| CF
-
+```
 ---
 
 ## 👔 Recruiter's Corner: Engineering Excellence
