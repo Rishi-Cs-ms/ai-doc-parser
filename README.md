@@ -70,18 +70,18 @@ The **AI Document Parser** provides a seamless, secure, and intelligent environm
     
     %% Document Processing Flow
     User -->|PUT Object| S3_Docs[AWS S3: Document Storage]
-    S3_Docs -->|Event Trigger| Lambda_Processor[Lambda: Document Processor]
+    S3_Docs -->|Event Trigger| Lambda_Processor[Lambda: AI Processor]
     
-    subgraph "AI Extraction Tier"
-        Lambda_Processor -->|Extract Text| Textract[AWS Textract / Rekognition]
-        Textract -->|Structured Result| Lambda_Processor
+    subgraph "Advanced AI Extraction Tier"
+        Lambda_Processor -->|1. Extract Raw Text| Textract[AWS Textract]
+        Lambda_Processor -->|2. Analyze & Reason| Bedrock[Amazon Bedrock: Nova Lite]
+        Bedrock -->|Structured JSON| Lambda_Processor
         Lambda_Processor -->|Store Data| DDB
     end
 
     %% CI/CD Flow
     GitHub[GitHub Repo] -->|Push| GHA[GitHub Actions]
     GHA -->|Build & Deploy| S3_Static
-    GHA -->|Invalidate Cache| CF
 ```
 ---
 
