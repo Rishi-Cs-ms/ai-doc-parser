@@ -47,7 +47,7 @@ The **AI Document Parser** provides a seamless, secure, and intelligent environm
 
 ## 🏗 Complete Project Architecture Diagram
 
-graph TD
+    graph TD
     %% User and Frontend
     User((User)) -->|HTTPS| CF[AWS CloudFront]
     CF -->|Serves Static Files| S3_Static[AWS S3: Web Hosting]
