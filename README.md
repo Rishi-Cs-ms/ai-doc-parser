@@ -54,7 +54,7 @@ The **AI Document Parser** provides a seamless, secure, and intelligent environm
     CF --> S3_Static[S3: Web Hosting]
     User -->|Login| Cognito[Cognito]
     
-    %% API & Data Retreival
+    %% API & Data Retrieval
     User -->|GET /data| APIGW[API Gateway]
     APIGW -->|Trigger| Lambda_Fetch[Lambda: Data Fetcher]
     
@@ -63,7 +63,7 @@ The **AI Document Parser** provides a seamless, secure, and intelligent environm
         DDB -.- GSI[[GSI: username-index]]
     end
 
-    %% The Processing Pipeline (The Core Logic)
+    %% The Processing Pipeline
     User -->|Direct Upload| S3_Docs[S3: Document Storage]
     S3_Docs -->|S3 Event| Lambda_AI[Lambda: The AI Orchestrator]
     
@@ -72,11 +72,10 @@ The **AI Document Parser** provides a seamless, secure, and intelligent environm
         Textract -->|Extracted Text| Lambda_AI
         
         Lambda_AI -->|2. Semantic Analysis| Bedrock[Bedrock: Nova Lite]
-        Note over Bedrock: "Extracts logic: Names, Dates, \nAmounts, Skills from raw text"
-        Bedrock -->|Cleaned JSON| Lambda_AI
+        Bedrock -->|3. Cleaned JSON| Lambda_AI
     end
     
-    Lambda_AI -->|3. Store Structured Data| DDB
+    Lambda_AI -->|4. Store Structured Data| DDB
 ```
 ---
 
