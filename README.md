@@ -49,39 +49,34 @@ The **AI Document Parser** provides a seamless, secure, and intelligent environm
 
 ```mermaid
     graph TD
-    %% User and Frontend
-    User((User)) -->|HTTPS| CF[AWS CloudFront]
-    CF -->|Serves Static Files| S3_Static[AWS S3: Web Hosting]
+    %% Frontend & Auth
+    User((User)) -->|HTTPS| CF[CloudFront]
+    CF --> S3_Static[S3: Web Hosting]
+    User -->|Login| Cognito[Cognito]
     
-    %% Authentication Flow
-    User -->|Login| Cognito[AWS Cognito: User Pool]
-    Cognito -->|JWT Tokens| User
+    %% API & Data Retreival
+    User -->|GET /data| APIGW[API Gateway]
+    APIGW -->|Trigger| Lambda_Fetch[Lambda: Data Fetcher]
     
-    %% API Interactions
-    User -->|Auth Header + Request| APIGW[AWS API Gateway]
-    
-    subgraph "Backend Services (Serverless)"
-        APIGW -->|Trigger| Lambda_Presigned[Lambda: Pre-signed URL Gen]
-        APIGW -->|Trigger| Lambda_Data[Lambda: Data Fetching]
-        
-        Lambda_Presigned -->|Returns URL| APIGW
-        Lambda_Data -->|Query| DDB[(Amazon DynamoDB)]
-    end
-    
-    %% Document Processing Flow
-    User -->|PUT Object| S3_Docs[AWS S3: Document Storage]
-    S3_Docs -->|Event Trigger| Lambda_Processor[Lambda: AI Processor]
-    
-    subgraph "Advanced AI Extraction Tier"
-        Lambda_Processor -->|1. Extract Raw Text| Textract[AWS Textract]
-        Lambda_Processor -->|2. Analyze & Reason| Bedrock[Amazon Bedrock: Nova Lite]
-        Bedrock -->|Structured JSON| Lambda_Processor
-        Lambda_Processor -->|Store Data| DDB
+    subgraph "Efficient Data Tier"
+        Lambda_Fetch -->|Query via GSI| DDB[(DynamoDB)]
+        DDB -.- GSI[[GSI: username-index]]
     end
 
-    %% CI/CD Flow
-    GitHub[GitHub Repo] -->|Push| GHA[GitHub Actions]
-    GHA -->|Build & Deploy| S3_Static
+    %% The Processing Pipeline (The Core Logic)
+    User -->|Direct Upload| S3_Docs[S3: Document Storage]
+    S3_Docs -->|S3 Event| Lambda_AI[Lambda: The AI Orchestrator]
+    
+    subgraph "The Sequential AI Handshake"
+        Lambda_AI -->|1. Raw Extraction| Textract[AWS Textract]
+        Textract -->|Extracted Text| Lambda_AI
+        
+        Lambda_AI -->|2. Semantic Analysis| Bedrock[Bedrock: Nova Lite]
+        Note over Bedrock: "Extracts logic: Names, Dates, \nAmounts, Skills from raw text"
+        Bedrock -->|Cleaned JSON| Lambda_AI
+    end
+    
+    Lambda_AI -->|3. Store Structured Data| DDB
 ```
 ---
 
