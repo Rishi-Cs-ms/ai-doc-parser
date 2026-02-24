@@ -9,7 +9,6 @@ const DataTable = ({ items, isLoading, definedColumns }) => {
         return items.map(item => {
             let parsedData = {};
 
-            // Try to get data from aiResult (already an object) or extracted_data (JSON string)
             const sourceData = item.aiResult || item.extracted_data;
 
             if (sourceData) {
